@@ -173,6 +173,29 @@ void Menu::HUD()
             
             if (this->bESPName)
                 GUI::DrawTextCentered(pos, IM_COL32_WHITE, actor.name.c_str());
+
+            for (auto& bone : actor.bones)
+            {
+                UnrealEngine::FVector2D bone_screen;
+                //  const auto& bone_world = bone.Translation + actor.CTW.Translation;
+				const auto& mx = UnrealEngine::Tools::matrix_multiplication(bone.to_matrix_with_scale(), actor.CTW.to_matrix_with_scale());
+                const UnrealEngine::FVector& bone_world = { mx._41, mx._42, mx._43 };
+				if (!UnrealEngine::Tools::TransformWorldToScreen(
+					cache.CameraView,
+					bone_world,
+					{ wndw.GetSize().x, wndw.GetSize().y },
+					&bone_screen,
+					true
+				))
+					continue;
+
+				GUI::CircleFilled(
+					ImVec2(bone_screen.X, bone_screen.Y) + wndw.Min,
+					IM_COL32_WHITE,
+					1.f,
+					64
+				);
+            }
         }
     }
 
@@ -229,6 +252,11 @@ void GUI::Line(const ImVec2& posA, const ImVec2& posB, const ImColor& color, con
 void GUI::Circle(const ImVec2& pos, const ImColor& color, const float& radius, const float& thickness, const float& segments)
 {
     ImGui::GetWindowDrawList()->AddCircle(pos, radius, color, segments, thickness);
+}
+
+void GUI::CircleFilled(const ImVec2& pos, const ImColor& color, const float& radius, const float& segments)
+{
+    ImGui::GetWindowDrawList()->AddCircleFilled(pos, radius, color, segments);
 }
 
 void GUI::CleanLine(const ImVec2& posA, const ImVec2& posB, const ImColor& color, const float& thickness)

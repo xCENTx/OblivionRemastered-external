@@ -442,9 +442,9 @@ namespace UnrealEngine
         struct USkinnedMeshComponent
         {
             UMeshComponent UMeshComponent;	//0x0000
-            char pad_05B0[96];	//0x05B0
-            TArray<FTransform> BoneArray;	//0x0610
-            char pad_0618[720];	//0x0618
+            char pad_05B0[106];	//0x05B0
+            TArray<i64_t> BoneArray;	//0x0610
+            char pad_0618[710];	//0x0618
         };	//Size: 0x08E8
 
         struct USkeletalMeshComponent

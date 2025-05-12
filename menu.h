@@ -66,6 +66,7 @@ public:	//	canvas
 	static void DrawTextCentered(const ImVec2& pos, const ImColor& color, const std::string& text, const float& szFont = 0.f);
 	static void Line(const ImVec2& posA, const ImVec2& posB, const ImColor& color, const float& thickness = 1.0f);
 	static void Circle(const ImVec2& pos, const ImColor& color, const float& radius, const float& thickness = 1.0f, const float& segments = 64);
+	static void CircleFilled(const ImVec2& pos, const ImColor& color, const float& radius, const float& segments = 64);
 	static void CleanLine(const ImVec2& posA, const ImVec2& posB, const ImColor& color, const float& thickness = 1.0f);
 	static void CleanCircle(const ImVec2& pos, const ImColor& color, const float& radius, const float& thickness = 1.0f, const float& segments = 64);
 };

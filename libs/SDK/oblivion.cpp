@@ -656,33 +656,53 @@ void TESOblivion::update()
 
     for (int i = 0; i < game.actors.count; i++)
     {
-        auto actor = actorsArray[i];// g_memory.Read<i64_t>(game.actors.data + (i * 0x8));
-        if (!actor)
+        auto pActor = actorsArray[i];// g_memory.Read<i64_t>(game.actors.data + (i * 0x8));
+        if (!pActor)
             continue;
 
-        const auto& actorObject = g_memory.Read<UnrealEngine::Classes::AActor>(actor);
-		if (!actorObject.RootComponent)
+        const auto& character = g_memory.Read<UnrealEngine::Classes::ACharacter>(pActor);
+        const auto& actor = character.APawn.AActor;
+        const auto& object = actor.UObject;
+        if (!actor.RootComponent || !character.Mesh)
 			continue;
 
         SImGuiActor imActor;
-        const auto& skeletalMesh = g_memory.Read<UnrealEngine::Classes::USkinnedMeshComponent>(actorObject.RootComponent);
-        imActor.TM = {
-            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeLocation),
-            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeRotation),
-            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeScale3D),
-            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentVelocity)
-        };
-        imActor.CTW = (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentToWorld);
-        imActor.object = actorObject.UObject;
-        imActor.pEntity = actor;
-        //  imActor.name = "ACTOR";
-        UnrealEngine::Tools::GetObjectName(actorObject.UObject, &imActor.name);
+        const auto& mesh = g_memory.Read<UnrealEngine::Classes::USkeletalMeshComponent>(character.Mesh);
+        const auto& rootComponent = g_memory.Read<UnrealEngine::Classes::USceneComponent>(actor.RootComponent);
+        const auto& boneArray = mesh.USkinnedMeshComponent.BoneArray;
 
-        if (actor == localPlayer.pPawn)
+
+        imActor.object = object;    //  object reference
+		imActor.pEntity = pActor;   //  pointer to actor
+        imActor.CTW = (mesh.USkinnedMeshComponent.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentToWorld); //  world translation component
+        imActor.TM = {
+            (rootComponent.RelativeLocation),
+            (rootComponent.RelativeRotation),
+            (rootComponent.RelativeScale3D),
+            (rootComponent.ComponentVelocity)
+        };
+
+        //  BONES
+        if (boneArray.count > 0 && boneArray.max > 0 && boneArray.max < 500)
+        {
+			std::unique_ptr<UnrealEngine::FTransform[]> bones = std::make_unique<UnrealEngine::FTransform[]>(boneArray.max);
+			if (!g_memory.ReadMemory((i64_t)boneArray.data, bones.get(), boneArray.max * sizeof(UnrealEngine::FTransform)))
+				continue;
+
+            std::vector<UnrealEngine::FTransform> boneTransforms; boneTransforms.resize(boneArray.max);
+			for (int i = 0; i < boneArray.max; i++)
+				boneTransforms[i] = bones[i];
+            imActor.bones = boneTransforms;
+        }
+
+        if (!UnrealEngine::Tools::GetObjectName(object, &imActor.name))
+            continue;
+        
+        if (pActor == localPlayer.pPawn)
         {
             localPlayer.CTW = imActor.CTW;
             localPlayer.TM = imActor.TM;
-
+			localPlayer.Skeleton = imActor.bones;
             continue;
         }
 
