@@ -233,6 +233,46 @@ namespace UnrealEngine
 
     FVector FMatrix4x4::GetLocation() const { return FVector(m[3][0], m[3][1], m[3][2]); }
 
+
+
+    bool Tools::GetObjectName(const Classes::UObject& object, std::string* out)
+    {
+        std::string result;
+
+        auto& index = object.UName.ComparisonIndex;
+        if (!index)
+            return false;
+
+        const auto& names_base = (g_memory.GetProcessInfo().dwModuleBase + UnrealEngine::Offsets::GNames);
+
+        const uint32_t& block = (index >> 16) & 0xFFFF;
+        const uint32_t& offset = index & 0xFFFF;
+        const uintptr_t block_ptr = names_base + 8 * block + 16;
+        const uintptr_t block_base = g_memory.Read<uintptr_t>(block_ptr);
+        if (!block_base)
+            return false;
+
+        const uintptr_t entry_ptr = block_base + 2 * offset;
+
+        uint16_t header = g_memory.Read<uint16_t>(entry_ptr);
+        if (header == 0)
+            return false;
+
+        const bool is_wide = header & 1;
+        const uint16_t len = header >> 6;
+
+        if (len == 0 || len > 127) // 127 because +1 for null-terminator if needed
+            return false;
+
+        char buffer[128] = {};
+        if (!g_memory.ReadMemory(entry_ptr + 2, buffer, len))
+            return false;
+
+        *out = std::string(buffer, len);
+
+        return true;
+    }
+
     bool Tools::GetObjectName(i64_t pObject, std::string* out)
     {
         std::string result;
@@ -242,21 +282,7 @@ namespace UnrealEngine
         if (!index)
             return false;
 
-        auto a1 = (g_memory.Read<i64_t>((g_memory.GetProcessInfo().dwModuleBase + UnrealEngine::Offsets::GNames) + 8 * ((i64_t)(index & 0x1FFFFFFF) >> 16) + 16) + 2 * (unsigned int)(unsigned __int16)index);
-        auto wide = g_memory.Read<unsigned __int16>(a1) & 1;
-        auto len = g_memory.Read<unsigned __int16>(a1) >> 6;
-        if (len <= 0 || len > 128)
-            return false;
-
-        auto fname = a1 + 2;
-
-        char buffer[128];
-        if (!g_memory.ReadMemory(fname, &buffer, len))
-            return false;
-
-        *out = std::string(buffer, buffer + len);
-
-        return out->size() > 0;
+		return GetObjectName(object, out);
     }
 
     void Tools::SetViewMode(unsigned __int8 viewMode)
@@ -644,7 +670,8 @@ void TESOblivion::update()
         imActor.CTW = (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentToWorld);
         imActor.object = actorObject.UObject;
         imActor.pEntity = actor;
-        UnrealEngine::Tools::GetObjectName(actor, &imActor.name);
+        //  imActor.name = "ACTOR";
+        UnrealEngine::Tools::GetObjectName(actorObject.UObject, &imActor.name);
 
         if (actor == localPlayer.pPawn)
         {

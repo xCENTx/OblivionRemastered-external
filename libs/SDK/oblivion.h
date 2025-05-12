@@ -667,6 +667,7 @@ namespace UnrealEngine
     namespace Tools
     {
         //  
+        bool GetObjectName(const Classes::UObject& object, std::string* outName);
         bool GetObjectName(i64_t pObject, std::string* outName);
         void SetViewMode(unsigned __int8 viewIndex);
         void SetMovementMode(unsigned __int8 viewIndex);
