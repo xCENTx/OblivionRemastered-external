@@ -1,0 +1,22 @@
+# exclude debug output
+.vs/
+bin/
+debug/
+x64/
+
+# exclude binaries
+*.exe
+*.dll
+*.bin
+*.lib
+
+# exclude external libraries
+*.idb
+*.pdb
+*.lib
+*.dll
+
+# exclude personal settings
+*.vcxproj.filters
+*.vcxproj.user
+*.code-workspace
