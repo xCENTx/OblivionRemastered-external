@@ -155,9 +155,9 @@ void Menu::HUD()
             UnrealEngine::FVector2D screen;
             if (!UnrealEngine::Tools::TransformWorldToScreen(
                 cache.CameraView, 
-                actor.TM.pos, 
-                screen, 
-                { wndw.GetSize().x, wndw.GetSize().y }, 
+                actor.TM.pos,
+                { wndw.GetSize().x, wndw.GetSize().y },
+                &screen, 
                 true
             ))
                 continue;

@@ -668,17 +668,17 @@ namespace UnrealEngine
     {
         //  
         bool GetObjectName(const Classes::UObject& object, std::string* outName);
-        bool GetObjectName(i64_t pObject, std::string* outName);
-        void SetViewMode(unsigned __int8 viewIndex);
-        void SetMovementMode(unsigned __int8 viewIndex);
+        bool GetObjectName(const i64_t& pObject, std::string* outName);
+        void SetViewMode(const unsigned __int8& viewIndex);
+        void SetMovementMode(const unsigned __int8& viewIndex);
 
         //  
-        bool IsValidPosition(FVector pos);
-        FVector GetLookDir(FRotator rotation);
-        FVector GetUpDir(FRotator rotation);
-        FVector GetRightDir(FRotator rotation);
-        bool TransformWorldToScreen(FCameraCacheEntry CameraView, FVector WorldLocation, FVector2D& Screen2D, FVector2D cxSize, bool isRelative);
-        bool WorldToScreen(CameraView camera, FVector worldLocation, FVector2D* out, FVector2D szScreen, bool isRelative = false);
+        bool IsValidPosition(const FVector& pos);
+        FVector GetLookDir(const FRotator& rotation);
+        FVector GetUpDir(const FRotator& rotation);
+        FVector GetRightDir(const FRotator& rotation);
+        bool TransformWorldToScreen(const FCameraCacheEntry& CameraView, const FVector& WorldLocation, const FVector2D& cxSize, FVector2D* Screen2D, const bool& isRelative);
+        bool WorldToScreen(const CameraView& camera, const FVector& worldLocation, const FVector2D& szScreen, FVector2D* out, const bool& isRelative = false);
 
         //  copy pasta
         D3DMATRIX to_matrix(FRotator rot, FVector origin = FVector(0, 0, 0));

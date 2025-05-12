@@ -273,7 +273,7 @@ namespace UnrealEngine
         return true;
     }
 
-    bool Tools::GetObjectName(i64_t pObject, std::string* out)
+    bool Tools::GetObjectName(const i64_t& pObject, std::string* out)
     {
         std::string result;
 
@@ -285,7 +285,7 @@ namespace UnrealEngine
 		return GetObjectName(object, out);
     }
 
-    void Tools::SetViewMode(unsigned __int8 viewMode)
+    void Tools::SetViewMode(const unsigned __int8& viewMode)
     {
         //  Get World
         auto pWorld = g_memory.Read<i64_t>(g_memory.GetProcessInfo().dwModuleBase + Offsets::GWorld);
@@ -316,7 +316,7 @@ namespace UnrealEngine
         g_memory.Write<unsigned __int8>(pViewport + Offsets::ViewportClient::ViewModeIndex, viewMode);
     }
 
-    void Tools::SetMovementMode(unsigned __int8 movementMode)
+    void Tools::SetMovementMode(const unsigned __int8& movementMode)
     {
         //  Get World
         auto pWorld = g_memory.Read<i64_t>(g_memory.GetProcessInfo().dwModuleBase + Offsets::GWorld);
@@ -356,7 +356,7 @@ namespace UnrealEngine
         g_memory.Write<unsigned __int8>(pMovementComponent + Offsets::UCharacterMovementComponent::MovementMode, movementMode);
     }
 
-    bool Tools::IsValidPosition(FVector pos)
+    bool Tools::IsValidPosition(const FVector& pos)
     {
         bool result{ true };
 
@@ -366,7 +366,7 @@ namespace UnrealEngine
         return result;
     }
 
-    FVector Tools::GetLookDir(FRotator rotation)
+    FVector Tools::GetLookDir(const FRotator& rotation)
     {
         float cp, sp, cy, sy;
         sincos(rotation.Pitch * (M_PI / 180.0f), sp, cp);
@@ -380,7 +380,7 @@ namespace UnrealEngine
         return fwd;
     }
 
-    FVector Tools::GetUpDir(FRotator rotation)
+    FVector Tools::GetUpDir(const FRotator& rotation)
     {
         float cp, sp, cr, sr, cy, sy;
 
@@ -396,7 +396,7 @@ namespace UnrealEngine
         return up;
     }
 
-    FVector Tools::GetRightDir(FRotator rotation)
+    FVector Tools::GetRightDir(const FRotator& rotation)
     {
         float cp, sp, cr, sr, cy, sy;
 
@@ -414,7 +414,7 @@ namespace UnrealEngine
         return right;
     }
 
-    bool Tools::TransformWorldToScreen(FCameraCacheEntry CameraView, FVector WorldLocation, FVector2D& Screen2D, FVector2D cxSize, bool isRelative)
+    bool Tools::TransformWorldToScreen(const FCameraCacheEntry& CameraView, const FVector& WorldLocation, const FVector2D& cxSize, FVector2D* Screen2D, const bool& isRelative)
     {
         //  Get Camera Information
         FVector vAxisX, vAxisY, vAxisZ, vDelta, vTransformed;
@@ -440,24 +440,29 @@ namespace UnrealEngine
         FVector2D center = { cxSize.X * .5f, cxSize.Y * .5f };
 
         //  Transform to Screen Space
-        Screen2D.X = center.X + vTransformed.X * (center.X / tanf(mFOV * M_PI / 360.f)) / vTransformed.Z;
-        Screen2D.Y = center.Y - vTransformed.Y * (center.X / tanf(mFOV * M_PI / 360.f)) / vTransformed.Z;
+        const FVector2D& result =
+        {
+            float(center.X + vTransformed.X * (center.X / tanf(mFOV * M_PI / 360.f)) / vTransformed.Z),
+            float(center.Y - vTransformed.Y * (center.X / tanf(mFOV * M_PI / 360.f)) / vTransformed.Z)
+        };
 
         //  Within camera view
-        if (isRelative && Screen2D.X <= 0.0f || Screen2D.Y <= 0.0f || Screen2D.X > cxSize.X || Screen2D.Y > cxSize.Y)
+        if (isRelative && result.X <= 0.0f || result.Y <= 0.0f || result.X > cxSize.X || result.Y > cxSize.Y)
             return false;
+
+		*Screen2D = result;
 
         return true;
     }
 
-    bool Tools::WorldToScreen(CameraView camera, FVector worldLocation, FVector2D* out, FVector2D szScreen, bool isRelative)
+    bool Tools::WorldToScreen(const CameraView& camera, const FVector& worldLocation, const FVector2D& szScreen, FVector2D* out, const bool& isRelative)
     {
         FCameraCacheEntry cache;
         cache.POV.Location = camera.location;
         cache.POV.Rotation = camera.rotation;
         cache.POV.Fov = camera.fov;
 
-        return TransformWorldToScreen(cache, worldLocation, *out, szScreen, isRelative);
+        return TransformWorldToScreen(cache, worldLocation, szScreen, out, isRelative);
     }
 
     //////////////////////////////////////////////////////
