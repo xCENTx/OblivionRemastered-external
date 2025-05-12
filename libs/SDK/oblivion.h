@@ -430,27 +430,26 @@ namespace UnrealEngine
         struct UPrimitiveComponent
         {
             USceneComponent USceneComponent;	//0x0000
-            char pad_02A0[704];	//0x02A0
-        };	//Size: 0x0560
+            char pad_02A0[728];	//0x02A0
+        };	//Size: 0x0578
 
         struct UMeshComponent
         {
             UPrimitiveComponent UPrimitiveComponent;	//0x0000
-            char pad_0560[56];	//0x0560
-        };	//Size: 0x0598
+            char pad_0578[56];	//0x0578
+        };	//Size: 0x05B0
 
         struct USkinnedMeshComponent
         {
             UMeshComponent UMeshComponent;	//0x0000
-            char pad_0598[80];	//0x0598
-            TArray<i64_t> BoneArray;	//0x05E8
-            char pad_05F8[728];	//0x05F8
-        };	//Size: 0x08D0
+            char pad_05B0[96];	//0x05B0
+            TArray<FTransform> BoneArray;	//0x0610
+            char pad_0618[720];	//0x0618
+        };	//Size: 0x08E8
 
         struct USkeletalMeshComponent
         {
             USkinnedMeshComponent USkinnedMeshComponent;	//0x0000
-            char pad_08D0[1792];	//0x08D0
         };	//Size: 0x0FD0
         
         struct UMovementComponent
@@ -551,7 +550,7 @@ namespace UnrealEngine
         /// v1.0.0
         inline auto GObjects = 0x09145170;    //  
         inline auto GNames = 0x0909EE80;      //  
-        inline auto GWorld = 0x092B0A30;      // 
+        inline auto GWorld = 0x092B3878;      // 
 
         namespace World
         {
@@ -661,7 +660,7 @@ namespace UnrealEngine
         namespace USkeletalMeshComponent
         {
             constexpr auto ComponentToWorld = 0x0240;    //  FTransform
-            constexpr auto BoneArray = 0x05E8;    //  TArray<FTransform>
+            constexpr auto BoneArray = 0x0610;    //  TArray<FTransform>
         }
     }
 
@@ -741,7 +740,6 @@ public:
         i64_t pULocalPlayer{ 0 };                             //  UWorld->OwningGameInstance->LocalPlayers[0]
         i64_t pPlayerController{ 0 };                         //  ULocalPlayer->PlayerController
         i64_t pPawn{ 0 };                                     //  APlayerController->AcknowledgedPawn
-        i64_t pPlayerState{ 0 };                              //  APawn->PlayerState
         i64_t pCameraManager{ 0 };                            //  APlayerController->PlayerCameraManager
         UnrealEngine::FTransform CTW;                           //  transforms translation
         UnrealEngine::EntityTransform TM;                       //  world transforms { location, rotation, scale, velocity }

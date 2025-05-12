@@ -611,28 +611,38 @@ void TESOblivion::update()
         return;
 
     //  Get Local Player Components
-    localPlayer.pPawn = g_memory.Read<i64_t>(localPlayer.pPlayerController + UnrealEngine::Offsets::Controller::AcknowledgedPawn);
-    localPlayer.pCameraManager = g_memory.Read<i64_t>(localPlayer.pPlayerController + UnrealEngine::Offsets::Controller::PlayerCameraManager);
-    localPlayer.sController = g_memory.Read<UnrealEngine::Classes::APlayerController>(localPlayer.pPlayerController);
-    localPlayer.pPlayerState = localPlayer.sController.AController.PlayerState;
+	const auto& pLocalController = g_memory.Read<UnrealEngine::Classes::APlayerController>(localPlayer.pPlayerController);
+    localPlayer.pCameraManager = pLocalController.PlayerCameraManager;
+    localPlayer.pPawn = pLocalController.AcknowledgedPawn;
+    localPlayer.sController = pLocalController;
     if (!localPlayer.pPawn || !localPlayer.pCameraManager)
         return;
 
     //  Get Actors
+	std::unique_ptr<__int64[]> actorsArray = std::make_unique<__int64[]>(game.actors.count);
+    if (!g_memory.ReadMemory(game.actors.data, actorsArray.get(), game.actors.count * sizeof(__int64)))
+        return;
+
     for (int i = 0; i < game.actors.count; i++)
     {
-        auto actor = g_memory.Read<i64_t>(game.actors.data + (i * 0x8));
+        auto actor = actorsArray[i];// g_memory.Read<i64_t>(game.actors.data + (i * 0x8));
         if (!actor)
             continue;
 
-        i64_t pSceneComponent = g_memory.Read<i64_t>(actor + UnrealEngine::Offsets::Actor::RootComponent);
-        if (!pSceneComponent)
-            continue;
+        const auto& actorObject = g_memory.Read<UnrealEngine::Classes::AActor>(actor);
+		if (!actorObject.RootComponent)
+			continue;
 
         SImGuiActor imActor;
-        imActor.TM = g_memory.Read<UnrealEngine::EntityTransform>(pSceneComponent + UnrealEngine::Offsets::USceneComponent::RelativeLocation);
-        imActor.CTW = g_memory.Read<UnrealEngine::FTransform>(pSceneComponent + UnrealEngine::Offsets::USkeletalMeshComponent::ComponentToWorld);
-        imActor.object = g_memory.Read<UnrealEngine::Classes::UObject>(actor);
+        const auto& skeletalMesh = g_memory.Read<UnrealEngine::Classes::USkinnedMeshComponent>(actorObject.RootComponent);
+        imActor.TM = {
+            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeLocation),
+            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeRotation),
+            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.RelativeScale3D),
+            (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentVelocity)
+        };
+        imActor.CTW = (skeletalMesh.UMeshComponent.UPrimitiveComponent.USceneComponent.ComponentToWorld);
+        imActor.object = actorObject.UObject;
         imActor.pEntity = actor;
         UnrealEngine::Tools::GetObjectName(actor, &imActor.name);
 

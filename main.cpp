@@ -50,7 +50,7 @@ int main()
 		g_dxWindow->CloneUpdate(g_memory.GetProcessInfo().hWnd);	//	refresh game window info
 		g_dxWindow->Update(g_Menu->GetOverlay());					//	update overlay
 
-		std::this_thread::sleep_for(1ms);
+		//	std::this_thread::sleep_for(1ms);
 		std::this_thread::yield();
 	}
 	wcm.join();
@@ -67,7 +67,7 @@ int mainthread()
 	{
 		g_Oblivion->update();						//	update game info
 		
-		std::this_thread::sleep_for(1ms);
+		//	std::this_thread::sleep_for(1ms);
 		std::this_thread::yield();
 	}
 
